@@ -15,7 +15,7 @@ model Coach {
   name       String
   email      String     @unique
   students   Student[]
-  time_slots TimeSlot[]
+  timeSlots TimeSlot[]
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 }
@@ -41,6 +41,17 @@ model TimeSlot {
   status       String    @default("available")
   bookedBy     Int?      
   student      Student?  @relation(fields: [bookedBy], references: [id])
+  meetingNotes MeetingNotes?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model MeetingNotes {
+  id           Int       @id @default(autoincrement())
+  timeSlotId   Int       @unique
+  timeSlot     TimeSlot  @relation(fields: [timeSlotId], references: [id], onDelete: Cascade) // if timeslot is deleted, delete this too
+  notes        String
+  satisfaction String
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
