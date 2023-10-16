@@ -9,6 +9,11 @@ import {
   AppBar,
   Toolbar,
 } from "@mui/material";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import moment from "moment";
+import { Calendar, momentLocalizer } from "react-big-calendar";
+
+const localizer = momentLocalizer(moment);
 
 export const meta: MetaFunction = () => {
   return [
@@ -45,6 +50,25 @@ export default function Index() {
             Learn More
           </Button>
         </Paper>
+        <Calendar
+          localizer={localizer}
+          events={[
+            {
+              title: "My Event",
+              start: new Date(),
+              end: new Date().setHours(new Date().getHours() + 2),
+            },
+            {
+              title: "My Event",
+              start: new Date(new Date().getTime() + 15 * 60 * 1000),
+              end: new Date(
+                new Date().getTime() + 15 * 60 * 1000 + 2 * 60 * 60 * 1000
+              ),
+            },
+          ]}
+          startAccessor="start"
+          endAccessor="end"
+        />
       </Container>
     </ThemeProvider>
   );
