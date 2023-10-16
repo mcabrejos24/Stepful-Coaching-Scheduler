@@ -10,6 +10,10 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.13",
+    "@mui/material": "^5.14.13",
     "@prisma/client": "^5.4.2",
     "@remix-run/css-bundle": "^2.0.1",
     "@remix-run/node": "^2.0.1",
