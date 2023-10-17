@@ -3,10 +3,11 @@ import { Link } from "@remix-run/react";
 
 interface ActionBarProps {
   isCoach: boolean;
+  onAddAvailability?: () => void;
 }
 
 export function ActionBar(props: ActionBarProps) {
-  const { isCoach } = props;
+  const { isCoach, onAddAvailability } = props;
   return (
     <AppBar position="relative" color="default" elevation={1}>
       <Toolbar style={{ display: "flex", justifyContent: "space-between" }}>
@@ -20,7 +21,7 @@ export function ActionBar(props: ActionBarProps) {
           <Button
             color="primary"
             variant="contained"
-            onClick={() => console.log("Adding availability")}
+            onClick={onAddAvailability}
           >
             Add Availability
           </Button>

@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { Modal, Box, TextField, Typography, Button } from "@mui/material";
+import {
+  Modal,
+  Box,
+  TextField,
+  Typography,
+  Button,
+  IconButton,
+} from "@mui/material";
 
 interface AddAvailabilityModalProps {
   isOpen: boolean;
@@ -30,13 +37,24 @@ export function AddAvailabilityModal(props: AddAvailabilityModalProps) {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: "60wh",
+          width: ["65vw", "40vw", "30vw"],
           bgcolor: "background.paper",
           boxShadow: 24,
           p: 4,
           borderRadius: 2,
         }}
       >
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+          }}
+        >
+          X
+        </IconButton>
         <Typography id="add-availability-title" variant="h5" mb={3}>
           Time Slot
         </Typography>
