@@ -2,8 +2,8 @@ import { Box, MenuItem, Select } from "@mui/material";
 import { useNavigate } from "@remix-run/react";
 import { useState } from "react";
 
-export function RoleSwitchFooter() {
-  const [role, setRole] = useState<string>("coach");
+export function RoleSwitchFooter({ userRole }: { userRole: string }) {
+  const [role, setRole] = useState<string>(userRole);
   const navigate = useNavigate();
 
   const handleRoleChange = (value: string) => {

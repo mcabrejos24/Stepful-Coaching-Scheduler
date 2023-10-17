@@ -106,7 +106,7 @@ export default function Coach() {
         onAddAvailability={handleAddAvailability}
       />
       <CoachCalendar events={events} />
-      <RoleSwitchFooter />
+      <RoleSwitchFooter userRole={"coach"} />
     </>
   );
 }
