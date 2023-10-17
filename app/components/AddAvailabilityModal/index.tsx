@@ -11,16 +11,19 @@ import {
 interface AddAvailabilityModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onAddAvailability: (
+    selectedDate: string,
+    selectedTime: string
+  ) => Promise<void>;
 }
 
 export function AddAvailabilityModal(props: AddAvailabilityModalProps) {
-  const { isOpen, onClose } = props;
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const { isOpen, onClose, onAddAvailability } = props;
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedTime, setSelectedTime] = useState<string>("");
 
   const handleApply = () => {
-    console.log("Selected Date:", selectedDate);
-    console.log("Selected Time:", selectedTime);
+    onAddAvailability(selectedDate, selectedTime);
     onClose();
   };
 

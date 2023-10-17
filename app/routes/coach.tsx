@@ -26,17 +26,58 @@ export default function Coach() {
   const [timeSlots, setTimeSlots] = useState<HydratedTimeSlot[]>([
     {
       duration: 2,
-      startTime: new Date(),
+      startTime: new Date(new Date().setSeconds(0, 0)),
       status: "booked",
       bookedBy: "Neo",
     },
     {
       duration: 2,
-      startTime: new Date(),
+      startTime: new Date(new Date().setSeconds(0, 0)),
       status: "available",
       hasConflict: true,
     },
   ]);
+
+  const handleAddAvailability = async (
+    selectedDate: string,
+    selectedTime: string
+  ) => {
+    // call to database to save
+    // hydrate timeslots
+    // save to setTimeSlots
+    // should rerender calendar
+    const dateObject = new Date(`${selectedDate}T${selectedTime}:00`);
+
+    const newSlot: HydratedTimeSlot = {
+      duration: 2,
+      startTime: dateObject,
+      status: "available",
+    };
+
+    const hasConflict = timeSlots.some((slot) => {
+      if (slot.bookedBy) {
+        const slotEndTime = new Date(
+          slot.startTime.getTime() + slot.duration * 60 * 60 * 1000
+        );
+        const newSlotEndTime = new Date(
+          newSlot.startTime.getTime() + newSlot.duration * 60 * 60 * 1000
+        );
+
+        return (
+          (newSlot.startTime >= slot.startTime &&
+            newSlot.startTime < slotEndTime) ||
+          (slot.startTime >= newSlot.startTime &&
+            slot.startTime < newSlotEndTime)
+        );
+      }
+      return false;
+    });
+
+    if (hasConflict) {
+      newSlot.hasConflict = true;
+    }
+    setTimeSlots([...timeSlots, newSlot]);
+  };
 
   const events: Event[] = timeSlots.map((slot) => {
     const start = new Date(slot.startTime);
@@ -62,6 +103,7 @@ export default function Coach() {
       <AddAvailabilityModal
         isOpen={isModalOpen}
         onClose={() => setModalOpen(false)}
+        onAddAvailability={handleAddAvailability}
       />
       <CoachCalendar events={events} />
       <RoleSwitchFooter />
