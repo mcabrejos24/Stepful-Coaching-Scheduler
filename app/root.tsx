@@ -8,6 +8,9 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import theme from "./theme";
+import { ThemeProvider } from "@mui/material";
+import { RoleSwitchFooter } from "./components/RoleSwitchFooter";
 
 export const links: LinksFunction = () => [
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
@@ -23,7 +26,10 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <Outlet />
+        <ThemeProvider theme={theme}>
+          <Outlet />
+          <RoleSwitchFooter />
+        </ThemeProvider>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
