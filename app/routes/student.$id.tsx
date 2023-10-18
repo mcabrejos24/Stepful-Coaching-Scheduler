@@ -161,7 +161,7 @@ export default function Student() {
         />
       )}
 
-      <RoleSwitchFooter userRole={`student/${studentData.id}`} />
+      <RoleSwitchFooter userRole={`student`} />
     </>
   );
 }

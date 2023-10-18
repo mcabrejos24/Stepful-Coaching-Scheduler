@@ -9,7 +9,7 @@ export function RoleSwitchFooter({ userRole }: { userRole: string }) {
 
   const handleRoleChange = (value: string) => {
     setRole(value);
-    navigate(`/${value}`);
+    navigate(`/${value}/1`);
   };
 
   return (
@@ -29,9 +29,8 @@ export function RoleSwitchFooter({ userRole }: { userRole: string }) {
         onChange={(e) => handleRoleChange(e.target.value)}
         variant="outlined"
       >
-        <MenuItem value="coach/1">Coach</MenuItem>
-        <MenuItem value="student/1">Student</MenuItem>
-        <MenuItem value="student/2">Student 2</MenuItem>
+        <MenuItem value="coach">Coach</MenuItem>
+        <MenuItem value="student">Student</MenuItem>
       </Select>
     </Box>
   );

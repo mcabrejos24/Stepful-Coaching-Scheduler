@@ -237,7 +237,7 @@ export default function CoachPage() {
           updateTimeSlot={handleTimeSlotUpdate}
         />
       )}
-      <RoleSwitchFooter userRole={`coach/${coachData.id}`} />
+      <RoleSwitchFooter userRole={`coach`} />
     </>
   );
 }
