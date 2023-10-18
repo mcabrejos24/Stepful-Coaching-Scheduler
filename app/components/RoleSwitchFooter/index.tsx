@@ -4,11 +4,12 @@ import { useState } from "react";
 
 export function RoleSwitchFooter({ userRole }: { userRole: string }) {
   const [role, setRole] = useState<string>(userRole);
+
   const navigate = useNavigate();
 
   const handleRoleChange = (value: string) => {
     setRole(value);
-    navigate(`/${value}`);
+    navigate(`/${value}/1`);
   };
 
   return (
