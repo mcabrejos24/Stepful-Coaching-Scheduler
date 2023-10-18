@@ -1,4 +1,4 @@
-import { TimeSlot, type MeetingNotes, type Student } from "@prisma/client";
+import { type TimeSlot, type MeetingNotes, type Student } from "@prisma/client";
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData, type MetaFunction } from "@remix-run/react";
 import { useEffect, useState } from "react";
@@ -139,7 +139,7 @@ export default function CoachPage() {
     setSlotModalOpen(true);
   };
 
-  const handleTimeSlotUpdate = (
+  const handleTimeSlotUpdate = async (
     id: number,
     notes?: string,
     satisfaction?: string,
@@ -148,12 +148,43 @@ export default function CoachPage() {
     // hit backend to update the id
     // refetch the timeslots via an endpoint
     // save new timeslots to savedState - for now just find id and update slot
-    const newSlots = timeSlots.map((slot) => {
-      if (slot.id === id)
-        return { ...slot, meetingNotes: { notes, satisfaction } };
-      return slot;
-    });
-    setTimeSlots(newSlots);
+    try {
+      const response = await fetch("/api/meeting-notes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          timeSlotId: id,
+          notes,
+          satisfaction,
+        }),
+      });
+      const {
+        updatedSlotItem,
+      }: {
+        updatedSlotItem: TimeSlot & { meetingNotes: MeetingNotes } & {
+          student: Student;
+        };
+      } = await response.json();
+
+      const newSlot: HydratedTimeSlot = {
+        id: updatedSlotItem.id,
+        duration: updatedSlotItem.duration / 60,
+        startTime: updatedSlotItem.startTime,
+        status: updatedSlotItem.status,
+        hasConflict: false,
+        bookedBy: updatedSlotItem.student,
+        meetingNotes: updatedSlotItem.meetingNotes,
+      };
+
+      const updateTimeSlots = timeSlots.map((slot) =>
+        slot.id === newSlot.id ? newSlot : slot
+      );
+      setTimeSlots(updateTimeSlots);
+    } catch (error) {
+      console.error("Failed POST request: ", error);
+    }
   };
 
   useEffect(() => {

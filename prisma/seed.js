@@ -30,7 +30,7 @@ async function main() {
         .subtract(1, "weeks")
         .set({ hour: 10, minute: 0, second: 0 })
         .toDate(),
-      status: "completed",
+      status: "complete",
       bookedBy: student1.id,
     },
   });
@@ -43,7 +43,7 @@ async function main() {
         .add(1, "days")
         .set({ hour: 14, minute: 0, second: 0 })
         .toDate(),
-      status: "completed",
+      status: "complete",
       bookedBy: student2.id,
     },
   });
