@@ -6,7 +6,7 @@ import {
 import { ActionBar } from "~/components/ActionBar";
 import { CoachCalendar } from "~/components/CoachCalendar";
 import { RoleSwitchFooter } from "~/components/RoleSwitchFooter";
-import { type HydratedTimeSlot } from "./coach";
+import { type HydratedTimeSlot } from "./coach.$id";
 import { useEffect, useState } from "react";
 import { type Event } from "react-big-calendar";
 import { TimeSlotModal } from "~/components/TimeSlotModal";
@@ -14,12 +14,11 @@ import db from "../db.server";
 import { useLoaderData } from "@remix-run/react";
 import { TimeSlot } from "@prisma/client";
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({ params }: LoaderFunctionArgs) => {
   // get student id from path param
   try {
-    const studentId = 1;
     const studentData = await db.student.findUnique({
-      where: { id: studentId },
+      where: { id: Number(params.id) },
       include: {
         coach: true,
       },
@@ -27,7 +26,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     const timeSlotsData = await db.timeSlot.findMany({
       where: {
         createdBy: studentData?.coachId,
-        OR: [{ bookedBy: studentId }, { bookedBy: null }],
+        OR: [{ bookedBy: Number(params.id) }, { bookedBy: null }],
       },
       include: {
         meetingNotes: true,
@@ -162,7 +161,7 @@ export default function Student() {
         />
       )}
 
-      <RoleSwitchFooter userRole={"student"} />
+      <RoleSwitchFooter userRole={`student/${studentData.id}`} />
     </>
   );
 }

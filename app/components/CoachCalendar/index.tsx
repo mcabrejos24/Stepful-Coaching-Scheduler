@@ -52,8 +52,11 @@ export function CoachCalendar(props: CoachCalendarProps) {
         case "booked":
           backgroundColor = theme.palette.secondary.main;
           break;
-        default:
+        case "complete":
           backgroundColor = theme.palette.success.main;
+          break;
+        default:
+          backgroundColor = theme.palette.info.main;
           break;
       }
     }

@@ -29,7 +29,7 @@ interface TimeSlotModalProps {
 export function TimeSlotModal(props: TimeSlotModalProps) {
   const { isOpen, onClose, userType, event, updateTimeSlot } = props;
   const isPast = event && event.end && event.end < new Date();
-
+  console.log(event);
   const [satisfaction, setSatisfaction] = useState<string>("1");
   const [notes, setNotes] = useState("");
 

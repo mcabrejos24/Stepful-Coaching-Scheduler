@@ -30,7 +30,7 @@ export default function Index() {
               variant="contained"
               color="primary"
               component={Link}
-              to="/coach"
+              to="/coach/1"
               fullWidth
               sx={{ py: 2 }}
             >
@@ -42,7 +42,7 @@ export default function Index() {
               variant="contained"
               color="secondary"
               component={Link}
-              to="/student"
+              to="/student/1"
               fullWidth
               sx={{ py: 2 }}
             >

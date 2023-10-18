@@ -20,15 +20,14 @@ export interface HydratedTimeSlot {
   meetingNotes?: Partial<MeetingNotes>;
 }
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({ params }: LoaderFunctionArgs) => {
   // get coach id from path param
   try {
-    const coachId = 1;
     const coachData = await db.coach.findUnique({
-      where: { id: coachId },
+      where: { id: Number(params.id) },
     });
     const timeSlotsData = await db.timeSlot.findMany({
-      where: { createdBy: coachId },
+      where: { createdBy: Number(params.id) },
       include: {
         meetingNotes: true,
         student: true,
@@ -238,7 +237,7 @@ export default function CoachPage() {
           updateTimeSlot={handleTimeSlotUpdate}
         />
       )}
-      <RoleSwitchFooter userRole={"coach"} />
+      <RoleSwitchFooter userRole={`coach/${coachData.id}`} />
     </>
   );
 }
