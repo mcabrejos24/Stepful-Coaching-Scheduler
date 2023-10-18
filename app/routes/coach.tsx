@@ -1,5 +1,6 @@
 import { type MeetingNotes, type Student } from "@prisma/client";
-import { type MetaFunction } from "@remix-run/react";
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import { useLoaderData, type MetaFunction } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { type Event } from "react-big-calendar";
 import { ActionBar } from "~/components/ActionBar";
@@ -7,13 +8,7 @@ import { AddAvailabilityModal } from "~/components/AddAvailabilityModal";
 import { CoachCalendar } from "~/components/CoachCalendar";
 import { RoleSwitchFooter } from "~/components/RoleSwitchFooter";
 import { TimeSlotModal } from "~/components/TimeSlotModal";
-
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Coach Dashboard" },
-    { name: "description", content: "Coach Dashboard" },
-  ];
-};
+import db from "../db.server";
 
 export interface HydratedTimeSlot {
   id: number;
@@ -25,84 +20,59 @@ export interface HydratedTimeSlot {
   meetingNotes?: Partial<MeetingNotes>;
 }
 
-export default function Coach() {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  // get coach id from path param
+  try {
+    const coachId = 1;
+    const coachData = await db.coach.findUnique({
+      where: { id: coachId },
+    });
+    const timeSlotsData = await db.timeSlot.findMany({
+      where: { createdBy: coachId },
+      include: {
+        meetingNotes: true,
+        student: true,
+      },
+    });
+
+    const hydratedTimeSlotsData = timeSlotsData.map((slot) => {
+      return {
+        id: slot.id,
+        duration: slot.duration / 60,
+        startTime: slot.startTime,
+        status: slot.status,
+        bookedBy: slot.student,
+        meetingNotes: slot.meetingNotes,
+        hasConflict: false,
+      };
+    });
+
+    return json({
+      coachData,
+      hydratedTimeSlotsData,
+    });
+  } catch (error) {
+    console.error("Error fetching scheudlar data: ", error);
+    throw error;
+  }
+};
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Coach Dashboard" },
+    { name: "description", content: "Coach Dashboard" },
+  ];
+};
+
+export default function CoachPage() {
+  const { hydratedTimeSlotsData } = useLoaderData<any>();
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
   const [isSlotModalOpen, setSlotModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<Event | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
-  const [timeSlots, setTimeSlots] = useState<HydratedTimeSlot[]>([
-    {
-      id: 1,
-      duration: 2,
-      startTime: new Date(new Date().setSeconds(0, 0)),
-      status: "booked",
-      bookedBy: {
-        id: 1,
-        name: "Neo",
-      },
-    },
-    {
-      id: 2,
-      duration: 2,
-      startTime: new Date(new Date().setSeconds(0, 0)),
-      status: "available",
-      hasConflict: true,
-    },
-    {
-      id: 3,
-      duration: 2,
-      startTime: new Date(
-        new Date(new Date().setDate(new Date().getDate() + 1)).setHours(
-          10,
-          0,
-          0,
-          0
-        )
-      ),
-      status: "available",
-      hasConflict: false,
-    },
-    {
-      id: 4,
-      duration: 2,
-      startTime: new Date(
-        new Date(new Date().setDate(new Date().getDate() - 1)).setHours(
-          2,
-          0,
-          0,
-          0
-        )
-      ),
-      status: "incomplete",
-      hasConflict: false,
-      bookedBy: {
-        id: 1,
-        name: "Neo",
-      },
-    },
-    {
-      id: 5,
-      duration: 2,
-      startTime: new Date(
-        new Date(new Date().setDate(new Date().getDate() - 1)).setHours(
-          6,
-          0,
-          0,
-          0
-        )
-      ),
-      status: "complete",
-      hasConflict: false,
-      bookedBy: {
-        id: 1,
-        name: "Neo",
-      },
-      meetingNotes: {
-        notes: "Good meetings. Talked a lot.",
-        satisfaction: "1",
-      },
-    },
-  ]);
+  const [timeSlots, setTimeSlots] = useState<HydratedTimeSlot[]>(
+    hydratedTimeSlotsData
+  );
 
   const handleAddAvailability = async (
     selectedDate: string,
