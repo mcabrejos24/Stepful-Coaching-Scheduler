@@ -33,18 +33,6 @@ export function TimeSlotModal(props: TimeSlotModalProps) {
   const [satisfaction, setSatisfaction] = useState<string>("1");
   const [notes, setNotes] = useState("");
 
-  // const [meetingNotes, setMeetingNotes] = useState<{
-  //   notes: string;
-  //   satisfaction: string;
-  // } | null>(
-  //   event?.resource?.status === "complete"
-  //     ? {
-  //         notes: event.resource?.notes,
-  //         satisfaction: event.resource?.satisfaction,
-  //       }
-  //     : null
-  // );
-
   function handleBooking() {
     updateTimeSlot(event.resource.id, undefined, undefined, true);
     onClose();

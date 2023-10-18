@@ -12,6 +12,7 @@ import { type Event } from "react-big-calendar";
 import { TimeSlotModal } from "~/components/TimeSlotModal";
 import db from "../db.server";
 import { useLoaderData } from "@remix-run/react";
+import { TimeSlot } from "@prisma/client";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   // get student id from path param
@@ -77,22 +78,52 @@ export default function Student() {
     setModalOpen(true);
   };
 
-  const handleTimeSlotUpdate = (
+  const handleTimeSlotUpdate = async (
     id: number,
     notes?: string,
     satisfaction?: string,
     studentBooking?: boolean
   ) => {
     if (studentBooking) {
+      try {
+        const response = await fetch(`/api/time-slot/${id}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            bookedBy: studentData.id,
+            status: "booked",
+          }),
+        });
+        const {
+          updatedSlotItem,
+        }: {
+          updatedSlotItem: TimeSlot;
+        } = await response.json();
+        const newSlot: HydratedTimeSlot = {
+          id: updatedSlotItem.id,
+          duration: updatedSlotItem.duration / 60,
+          startTime: updatedSlotItem.startTime,
+          status: updatedSlotItem.status,
+          bookedBy: studentData,
+        };
+        const updateTimeSlots = timeSlots.map((slot) =>
+          slot.id === newSlot.id ? newSlot : slot
+        );
+        setTimeSlots(updateTimeSlots);
+      } catch (error) {
+        console.error("Failed POST request: ", error);
+      }
       // // hit backend to update the booked by based on id of the student
       // // refetch the timeslots via an endpoint
       // // save new timeslots to savedState - for now just find id and update slot
-      const newSlots = timeSlots.map((slot) => {
-        if (slot.id === id)
-          return { ...slot, bookedBy: { id: studentData.id, name: "Tony" } };
-        return slot;
-      });
-      setTimeSlots(newSlots);
+      // const newSlots = timeSlots.map((slot) => {
+      //   if (slot.id === id)
+      //     return { ...slot, bookedBy: { id: studentData.id, name: "Tony" } };
+      //   return slot;
+      // });
+      // setTimeSlots(newSlots);
     }
   };
 
@@ -105,6 +136,7 @@ export default function Student() {
         start,
         end,
         resource: {
+          id: slot.id,
           status: slot.status,
         },
       };

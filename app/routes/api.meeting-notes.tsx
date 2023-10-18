@@ -35,7 +35,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       updatedSlotItem,
     });
   } catch (error) {
-    console.error("Error saving time slot to DB: ", error);
+    console.error("Error saving meeting notes or time slot to DB: ", error);
     throw error;
   }
 };
