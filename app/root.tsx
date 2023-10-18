@@ -8,6 +8,8 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import theme from "./theme";
+import { ThemeProvider } from "@mui/material";
 
 export const links: LinksFunction = () => [
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
@@ -23,7 +25,9 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <Outlet />
+        <ThemeProvider theme={theme}>
+          <Outlet />
+        </ThemeProvider>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
