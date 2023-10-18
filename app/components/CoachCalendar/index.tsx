@@ -7,11 +7,12 @@ const localizer = momentLocalizer(moment);
 
 interface CoachCalendarProps {
   events?: Event[];
+  handleSlotClick: (event: Event) => void;
 }
 
 export function CoachCalendar(props: CoachCalendarProps) {
   const theme = useTheme();
-  const { events } = props;
+  const { events, handleSlotClick } = props;
 
   const customEventPropGetter = (
     event: Event,
@@ -20,7 +21,7 @@ export function CoachCalendar(props: CoachCalendarProps) {
     isSelected: boolean
   ) => {
     let backgroundColor = theme.palette.info.main; // default color
-    if (event.resource.hasConflict) {
+    if (event.resource?.hasConflict) {
       backgroundColor = theme.palette.error.main;
     } else {
       switch (event.resource.status) {
@@ -32,6 +33,7 @@ export function CoachCalendar(props: CoachCalendarProps) {
           break;
         case "complete":
           backgroundColor = theme.palette.success.main;
+          break;
         default:
           backgroundColor = theme.palette.info.main;
           break;
@@ -53,6 +55,7 @@ export function CoachCalendar(props: CoachCalendarProps) {
         startAccessor="start"
         endAccessor="end"
         eventPropGetter={customEventPropGetter}
+        onSelectEvent={handleSlotClick}
       />
     </Container>
   );
