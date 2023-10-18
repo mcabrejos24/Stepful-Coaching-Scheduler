@@ -1,12 +1,60 @@
-import { type MetaFunction } from "@remix-run/node";
+import {
+  json,
+  type LoaderFunctionArgs,
+  type MetaFunction,
+} from "@remix-run/node";
 import { ActionBar } from "~/components/ActionBar";
 import { CoachCalendar } from "~/components/CoachCalendar";
 import { RoleSwitchFooter } from "~/components/RoleSwitchFooter";
 import { type HydratedTimeSlot } from "./coach";
 import { useEffect, useState } from "react";
 import { type Event } from "react-big-calendar";
-
 import { TimeSlotModal } from "~/components/TimeSlotModal";
+import db from "../db.server";
+import { useLoaderData } from "@remix-run/react";
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  // get student id from path param
+  try {
+    const studentId = 1;
+    const studentData = await db.student.findUnique({
+      where: { id: studentId },
+      include: {
+        coach: true,
+      },
+    });
+    const timeSlotsData = await db.timeSlot.findMany({
+      where: {
+        createdBy: studentData?.coachId,
+        OR: [{ bookedBy: studentId }, { bookedBy: null }],
+      },
+      include: {
+        meetingNotes: true,
+        student: true,
+      },
+    });
+
+    const hydratedTimeSlotsData = timeSlotsData.map((slot) => {
+      return {
+        id: slot.id,
+        duration: slot.duration / 60,
+        startTime: slot.startTime,
+        status: slot.status,
+        bookedBy: slot.student,
+        meetingNotes: slot.meetingNotes,
+        hasConflict: false,
+      };
+    });
+
+    return json({
+      studentData,
+      hydratedTimeSlotsData,
+    });
+  } catch (error) {
+    console.error("Error fetching scheudlar data: ", error);
+    throw error;
+  }
+};
 
 export const meta: MetaFunction = () => {
   return [
@@ -16,36 +64,13 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Student() {
-  const thisUserId = 1;
+  const { studentData, hydratedTimeSlotsData } = useLoaderData<any>();
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<Event | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
-  const [timeSlots, setTimeSlots] = useState<HydratedTimeSlot[]>([
-    {
-      id: 1,
-      duration: 2,
-      startTime: new Date(new Date().setSeconds(0, 0)),
-      status: "booked",
-      bookedBy: {
-        id: 1,
-        name: "Neo",
-      },
-    },
-    {
-      id: 2,
-      duration: 2,
-      startTime: new Date(
-        new Date().setHours(
-          new Date().getHours() + 3,
-          new Date().getMinutes(),
-          0,
-          0
-        )
-      ),
-      status: "available",
-      hasConflict: false,
-    },
-  ]);
+  const [timeSlots, setTimeSlots] = useState<HydratedTimeSlot[]>(
+    hydratedTimeSlotsData
+  );
 
   const handleSlotClick = (event: Event) => {
     setSelectedSlot(event);
@@ -64,7 +89,7 @@ export default function Student() {
       // // save new timeslots to savedState - for now just find id and update slot
       const newSlots = timeSlots.map((slot) => {
         if (slot.id === id)
-          return { ...slot, bookedBy: { id: thisUserId, name: "Tony" } };
+          return { ...slot, bookedBy: { id: studentData.id, name: "Tony" } };
         return slot;
       });
       setTimeSlots(newSlots);
@@ -72,31 +97,29 @@ export default function Student() {
   };
 
   useEffect(() => {
-    const eventsArr: Event[] = timeSlots
-      .filter(
-        (slot) =>
-          (slot.status === "booked" && slot.bookedBy?.id === thisUserId) ||
-          (slot.status === "available" && !slot.hasConflict)
-      )
-      .map((slot) => {
-        const start = new Date(slot.startTime);
-        const end = new Date(start.getTime() + slot.duration * 60 * 60 * 1000);
-        return {
-          title: slot.bookedBy ? `Booked by You` : "Available",
-          start,
-          end,
-          resource: {
-            status: slot.status,
-          },
-        };
-      });
+    const eventsArr: Event[] = timeSlots.map((slot) => {
+      const start = new Date(slot.startTime);
+      const end = new Date(start.getTime() + slot.duration * 60 * 60 * 1000);
+      return {
+        title: slot.bookedBy ? `Booked by You` : "Available",
+        start,
+        end,
+        resource: {
+          status: slot.status,
+        },
+      };
+    });
     setEvents(eventsArr);
   }, [timeSlots]);
 
   return (
     <>
       <ActionBar isCoach={false} />
-      <CoachCalendar events={events} handleSlotClick={handleSlotClick} />
+      <CoachCalendar
+        events={events}
+        handleSlotClick={handleSlotClick}
+        userType="student"
+      />
       {selectedSlot && (
         <TimeSlotModal
           isOpen={isModalOpen}

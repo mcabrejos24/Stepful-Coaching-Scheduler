@@ -8,11 +8,12 @@ const localizer = momentLocalizer(moment);
 interface CoachCalendarProps {
   events?: Event[];
   handleSlotClick: (event: Event) => void;
+  userType: string;
 }
 
 export function CoachCalendar(props: CoachCalendarProps) {
   const theme = useTheme();
-  const { events, handleSlotClick } = props;
+  const { events, handleSlotClick, userType } = props;
 
   const customEventPropGetter = (
     event: Event,
@@ -21,21 +22,38 @@ export function CoachCalendar(props: CoachCalendarProps) {
     isSelected: boolean
   ) => {
     let backgroundColor = theme.palette.info.main; // default color
-    if (event.resource?.hasConflict) {
-      backgroundColor = theme.palette.error.main;
+    if (userType === "coach") {
+      if (event.resource?.hasConflict) {
+        backgroundColor = theme.palette.error.main;
+      } else {
+        switch (event.resource.status) {
+          case "available":
+            backgroundColor = theme.palette.info.main;
+            break;
+          case "booked":
+            backgroundColor = theme.palette.secondary.main;
+            break;
+          case "incomplete":
+            backgroundColor = theme.palette.warning.main;
+            break;
+          case "complete":
+            backgroundColor = theme.palette.success.main;
+            break;
+          default:
+            backgroundColor = theme.palette.info.main;
+            break;
+        }
+      }
     } else {
       switch (event.resource.status) {
+        case "available":
+          backgroundColor = theme.palette.info.main;
+          break;
         case "booked":
           backgroundColor = theme.palette.secondary.main;
           break;
-        case "incomplete":
-          backgroundColor = theme.palette.warning.main;
-          break;
-        case "complete":
-          backgroundColor = theme.palette.success.main;
-          break;
         default:
-          backgroundColor = theme.palette.info.main;
+          backgroundColor = theme.palette.success.main;
           break;
       }
     }

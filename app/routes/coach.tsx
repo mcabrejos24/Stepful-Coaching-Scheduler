@@ -221,7 +221,11 @@ export default function CoachPage() {
         onClose={() => setModalOpen(false)}
         onAddAvailability={handleAddAvailability}
       />
-      <CoachCalendar events={events} handleSlotClick={handleSlotClick} />
+      <CoachCalendar
+        events={events}
+        handleSlotClick={handleSlotClick}
+        userType="coach"
+      />
       {selectedSlot && (
         <TimeSlotModal
           isOpen={isSlotModalOpen}
