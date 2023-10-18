@@ -1,4 +1,4 @@
-import { type MeetingNotes, type Student } from "@prisma/client";
+import { TimeSlot, type MeetingNotes, type Student } from "@prisma/client";
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData, type MetaFunction } from "@remix-run/react";
 import { useEffect, useState } from "react";
@@ -65,7 +65,7 @@ export const meta: MetaFunction = () => {
 };
 
 export default function CoachPage() {
-  const { hydratedTimeSlotsData } = useLoaderData<any>();
+  const { coachData, hydratedTimeSlotsData } = useLoaderData<any>();
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
   const [isSlotModalOpen, setSlotModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<Event | null>(null);
@@ -78,44 +78,60 @@ export default function CoachPage() {
     selectedDate: string,
     selectedTime: string
   ) => {
-    // call to database to save
-    // hydrate timeslots
-    // save to setTimeSlots
-    // should rerender calendar
     const dateObject = new Date(`${selectedDate}T${selectedTime}:00`);
-    const status = dateObject < new Date() ? "incomplete" : "availabile";
-    // TODO: if filling out for a previous date, include logic to add the student they met with
-    // TODO: possibly an option to fill out feedback here as well
-    const newSlot: HydratedTimeSlot = {
-      id: 3,
-      duration: 2,
-      startTime: dateObject,
-      status: status,
-    };
 
-    const hasConflict = timeSlots.some((slot) => {
-      if (slot.bookedBy) {
-        const slotEndTime = new Date(
-          slot.startTime.getTime() + slot.duration * 60 * 60 * 1000
-        );
-        const newSlotEndTime = new Date(
-          newSlot.startTime.getTime() + newSlot.duration * 60 * 60 * 1000
-        );
+    // TODO: if filling out for a previous date ` like status,
+    // include logic to add the student they met with
+    // possibly an option to fill out feedback here as well
+    try {
+      const response = await fetch("/api/time-slot", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          date: dateObject,
+          startTime: dateObject,
+          coachId: coachData.id,
+          ...(dateObject < new Date() && { status: "incomplete" }),
+        }),
+      });
+      const { newTimeSlot }: { newTimeSlot: TimeSlot } = await response.json();
 
-        return (
-          (newSlot.startTime >= slot.startTime &&
-            newSlot.startTime < slotEndTime) ||
-          (slot.startTime >= newSlot.startTime &&
-            slot.startTime < newSlotEndTime)
-        );
-      }
-      return false;
-    });
-
-    if (hasConflict) {
-      newSlot.hasConflict = true;
+      const newSlot: HydratedTimeSlot = {
+        id: newTimeSlot.id,
+        duration: newTimeSlot.duration / 60,
+        startTime: newTimeSlot.startTime,
+        status: newTimeSlot.status,
+        hasConflict: false,
+      };
+      setTimeSlots([...timeSlots, newSlot]);
+    } catch (error) {
+      console.error("Failed POST request: ", error);
     }
-    setTimeSlots([...timeSlots, newSlot]);
+
+    // TODO: implement overlapping slot conflicts
+    // const hasConflict = timeSlots.some((slot) => {
+    //   if (slot.bookedBy) {
+    //     const slotEndTime = new Date(
+    //       slot.startTime.getTime() + slot.duration * 60 * 60 * 1000
+    //     );
+    //     const newSlotEndTime = new Date(
+    //       newSlot.startTime.getTime() + newSlot.duration * 60 * 60 * 1000
+    //     );
+
+    //     return (
+    //       (newSlot.startTime >= slot.startTime &&
+    //         newSlot.startTime < slotEndTime) ||
+    //       (slot.startTime >= newSlot.startTime &&
+    //         slot.startTime < newSlotEndTime)
+    //     );
+    //   }
+    //   return false;
+    // });
+    // if (hasConflict) {
+    //   newSlot.hasConflict = true;
+    // }
   };
 
   const handleSlotClick = (event: Event) => {
