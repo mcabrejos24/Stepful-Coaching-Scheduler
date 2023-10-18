@@ -92,7 +92,8 @@ export default function CoachPage() {
           date: dateObject,
           startTime: dateObject,
           coachId: coachData.id,
-          ...(dateObject < new Date() && { status: "incomplete" }),
+          ...(new Date(dateObject.getTime() + 2 * 60 * 60 * 1000) <
+            new Date() && { status: "incomplete" }),
         }),
       });
       const { newTimeSlot }: { newTimeSlot: TimeSlot } = await response.json();
@@ -144,9 +145,6 @@ export default function CoachPage() {
     satisfaction?: string,
     studentBooking?: boolean
   ) => {
-    // hit backend to update the id
-    // refetch the timeslots via an endpoint
-    // save new timeslots to savedState - for now just find id and update slot
     try {
       const response = await fetch("/api/meeting-notes", {
         method: "POST",

@@ -29,10 +29,8 @@ interface TimeSlotModalProps {
 export function TimeSlotModal(props: TimeSlotModalProps) {
   const { isOpen, onClose, userType, event, updateTimeSlot } = props;
   const isPast = event && event.end && event.end < new Date();
-  console.log(event);
   const [satisfaction, setSatisfaction] = useState<string>("1");
   const [notes, setNotes] = useState("");
-
   function handleBooking() {
     updateTimeSlot(event.resource.id, undefined, undefined, true);
     onClose();
@@ -127,10 +125,13 @@ export function TimeSlotModal(props: TimeSlotModalProps) {
               </>
             ) : (
               <>
-                <Typography variant="h6" mb={1}>
-                  Feedback
-                </Typography>
-                {event?.resource?.status === "incomplete" ? (
+                {event.resource?.status !== "available" && (
+                  <Typography variant="h6" mb={1}>
+                    Feedback
+                  </Typography>
+                )}
+                {(isPast && event.resource?.status === "booked") ||
+                event?.resource?.status === "incomplete" ? (
                   <>
                     <Typography color="warning.main" variant="body2" mb={3}>
                       Add feedback to complete this time slot.
@@ -174,20 +175,23 @@ export function TimeSlotModal(props: TimeSlotModalProps) {
                   </>
                 ) : (
                   <>
-                    <Typography variant="body1" mb={2}>
-                      Student satisfaction: {event?.resource?.satisfaction}
-                    </Typography>
-                    <Typography variant="body1" mb={2}>
-                      Notes: {event?.resource?.notes}
-                    </Typography>
-
-                    {/* <Button
+                    {event.resource?.status === "complete" && (
+                      <>
+                        <Typography variant="body1" mb={2}>
+                          Student satisfaction: {event?.resource?.satisfaction}
+                        </Typography>
+                        <Typography variant="body1" mb={2}>
+                          Notes: {event?.resource?.notes}
+                        </Typography>
+                        {/* <Button
                       variant="contained"
                       color="secondary"
                       onClick={handleSaveFeedback}
                     >
                       Edit
                     </Button> */}
+                      </>
+                    )}
                   </>
                 )}
               </>

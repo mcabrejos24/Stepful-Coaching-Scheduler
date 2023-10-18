@@ -31,6 +31,10 @@ export function CoachCalendar(props: CoachCalendarProps) {
             backgroundColor = theme.palette.info.main;
             break;
           case "booked":
+            if (event.end && event.end < new Date()) {
+              backgroundColor = theme.palette.warning.main;
+              break;
+            }
             backgroundColor = theme.palette.secondary.main;
             break;
           case "incomplete":
@@ -50,6 +54,10 @@ export function CoachCalendar(props: CoachCalendarProps) {
           backgroundColor = theme.palette.info.main;
           break;
         case "booked":
+          if (event.end && event.end < new Date()) {
+            backgroundColor = theme.palette.success.main;
+            break;
+          }
           backgroundColor = theme.palette.secondary.main;
           break;
         case "complete":
